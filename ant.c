@@ -6,6 +6,16 @@
 #define ThreadPerProcess 5
 
 void *func(void *arg);
+void Send_tour(tour_t tour, int dest);
+void Recieve_tour(tour_t tour, int src);
+
+typedef struct {
+    int *cities; //cities in partial tour
+    int count; // number of cities in partial tour
+    int cost; // cost of partial tour
+} tour_struct;
+
+typedef tour_struct* tour_t;
 
 int main(int argc, char *argv[])
 {
@@ -111,4 +121,25 @@ void *func(void *arg)
     
 
     return 0;
+}
+
+void Send_tour(tour_t tour, int dest)
+{
+    int position = 0;
+    MPI_Pack(tour->cities, n+1, MPI_INT, contig_buf, LARGE, &position, MPI_COMM_WORLD);
+    MPI_Pack(tour->count, n+1, MPI_INT, contig_buf, LARGE, &position, MPI_COMM_WORLD);
+MPI_Pack(tour->cost, n+1, MPI_INT, contig_buf, LARGE, &position, MPI_COMM_WORLD);
+
+    MPI_Send(contig_buf, position, MPI_PACKED, dest, 0, MPI_COMM_WORLD);
+}
+
+void Recieve_tour(tour_t tour, int src)
+{
+    int position = 0;
+
+    MPI_Recv(contig_buf, LARGE, MPI_PACKED, src, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Unpack(contig_buf, LARGE, &position, &tour->cities, n+1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(contig_buf, LARGE, &position, &tour->count, n+1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Unpack(contig_buf, LARGE, &position, &tour->cost, n+1, MPI_INT, MPI_COMM_WORLD);
+
 }
