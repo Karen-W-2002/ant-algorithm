@@ -5,4 +5,4 @@ An ant colony algorithm implemented with MPI and multithreads
 mpiicc -no-multibyte-chars -o ant ant.c -lpthread
 
 ### Execution
-./ant -n (# of processors) ant
+mpiexec -n (# of processors) ant
